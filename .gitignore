@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.DS_Store
+*.tsbuildinfo
+raycast-env.d.ts
+
+# Local settings, credentials, and private runtime data
+.env
+.env.*
+!.env.example
+!.env.*.example
+.npmrc
+.netrc
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+.vscode/
+.idea/
+.codex/
+.agents/
+.aws/
+.openai/
+icons-v1/
+folder-previews-v1/
+appsolutely.layout*

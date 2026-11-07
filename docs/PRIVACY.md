@@ -1,0 +1,25 @@
+# Privacy
+
+## Application data
+
+Appsolutely reads the installed application catalog exposed by Raycast, application bundle metadata, and application icons. It saves folder names, folder relationships, application identities, installation paths, and ordering in Raycast LocalStorage. Recovery copies of repaired layouts also stay in LocalStorage.
+
+High-resolution icon caches and generated folder previews are stored in the extension's support directory. Cache metadata includes local application paths. Appsolutely does not add encryption to these files; they rely on the operating system and Raycast's local storage protections. Reset Layout resets organization but does not purge icon caches or prior recovery copies.
+
+The extension's source contains no network requests, analytics, remote image loading, account integration, or automatic error-reporting calls. Native helper commands only read metadata or render icons. They do not send application names or paths to an external service. Errors can display local paths in Raycast toasts; inspect the screen before sharing an error screenshot.
+
+Development tooling is separate: npm downloads dependencies, Raycast lint fetches its schema and checks the configured Store author, and GitHub receives files when they are pushed.
+
+## Repository sharing review
+
+The files selected for the initial repository upload were reviewed for credentials, private keys, personal filesystem paths, account details, runtime data, and screenshot metadata.
+
+- No credential, private key, personal home-directory path, or private email address was found embedded in the project files selected for upload. Test paths use synthetic examples.
+- Screenshots revealing third-party application inventory were replaced with stock macOS apps in a temporary demonstration layout. Old inventory captures are excluded from the repository.
+- Included PNG files were re-encoded to remove metadata and checked visually. The captures show only the extension window.
+- Local settings, environment files, credential files, dependency directories, generated output, and runtime caches are excluded by `.gitignore`.
+- The package's Raycast author handle is intentional Store metadata. Git commit attribution uses the existing Git configuration, as requested by the repository owner; that name and email are visible in commit history to anyone with repository access.
+
+Runtime LocalStorage, icon caches, recovery copies, GitHub authentication material, and machine-specific configuration are not included in the repository. This review covers the project's source and shareable artifacts; it is not a security audit of macOS, Raycast, GitHub, or all upstream dependency implementations.
+
+Before making a repository public or adding new screenshots, repeat the content review. A private repository limits access but does not remove information from Git history.
