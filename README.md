@@ -53,18 +53,6 @@ With development running, open Raycast and select **Open Appsolutely**. Arrow ke
 | ⌘R       | Refresh installed applications                  |
 | Escape   | Clear search / return through native navigation |
 
-## Search and refresh
-
-Typing in **any grid** searches all installed applications by name, including apps inside deeply nested folders. Matching is case-insensitive. Search results launch apps directly; folders do not compete with app results. Clearing the search restores the current folder. **Search All Applications** opens a dedicated search view at your current location with the same behavior.
-
-Discovery runs each time the command opens. **Refresh Applications** picks up installs, removals, and renames during a session without resetting organization. Discovery and icon availability follow Raycast's `getApplications()` API and application indexing; Appsolutely does not scan directories itself or hardcode any installed app.
-
-For sharp grid images, Appsolutely reads each discovered app's declared bundle icon and converts it to a transparent PNG up to 512×512 using the built-in macOS `plutil` and `sips` utilities. If that icon is missing, invalid, or fully transparent, it asks macOS's AppKit icon resolver for the actual application icon using the built-in JavaScript/Objective-C bridge. This supports modern asset-catalog icons such as Books without launching the app or requesting Automation access. If neither source produces a visible image, Raycast's `fileIcon` remains the fallback. Icons are loaded in the background with bounded concurrency and cached under Raycast's extension support directory (`icons-v1`, cache schema version 2). Updates to the bundle, icon, or fallback asset catalog invalidate its cache. Cached blank images are rejected and rebuilt automatically. No developer toolchain is required.
-
-Folder previews combine those PNGs into cached 512×512 images under `folder-previews-v1`. The small, pure JavaScript `pngjs` dependency handles PNG decoding and encoding without native addons. Previews preserve transparency, use smooth downsampling, and regenerate when their contents or source icons change. Apps whose icons are not yet available use a generic miniature until their high-resolution icon loads.
-
-Raycast controls grid tile backgrounds and hover/selection highlights. The current native `Grid` API does not expose tile background styling or hover events, so hover-only gray backgrounds cannot be configured by this extension. PNGs retain transparency; Appsolutely does not bake gray backgrounds into them.
-
 ## Persistence and application identity
 
 Organization is stored exclusively in Raycast `LocalStorage` under `appsolutely.layout`, using schema version 1. No network requests, accounts, analytics, or additional permissions are used at runtime.
