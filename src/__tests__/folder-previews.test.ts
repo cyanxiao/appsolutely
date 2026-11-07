@@ -104,3 +104,22 @@ test("preview caching reuses composites, deduplicates concurrent renders, repair
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("leaving large view prevents a queued folder preview from loading icons or writing an image", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "appsolutely-cancelled-preview-"));
+  try {
+    const controller = new AbortController();
+    const preview = folderPreview(
+      [{ appPath: "/Applications/Editor.app" }],
+      join(directory, "previews"),
+      join(directory, "icons"),
+      controller.signal,
+    );
+    controller.abort();
+    assert.equal(await preview, undefined);
+    await assert.rejects(stat(join(directory, "icons")), { code: "ENOENT" });
+    await assert.rejects(stat(join(directory, "previews")), { code: "ENOENT" });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

@@ -20,7 +20,7 @@ export function FolderItem({
   viewMode: ViewMode;
 }) {
   const { update } = useLauncherState();
-  const preview = useFolderPreview(folder.id, viewMode === "grid");
+  const preview = useFolderPreview(folder.id, viewMode === "grid-large");
 
   async function remove() {
     if (

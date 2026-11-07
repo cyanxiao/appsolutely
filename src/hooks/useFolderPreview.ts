@@ -17,18 +17,21 @@ export function useFolderPreview(folderId: string, enabled = true): string | und
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
     const requestedEntries: FolderPreviewEntry[] = JSON.parse(key);
     if (requestedEntries.length) {
       void folderPreview(
         requestedEntries,
         join(environment.supportPath, "folder-previews-v1"),
         join(environment.supportPath, "icons-v1"),
+        controller.signal,
       ).then((path) => {
         if (!cancelled && path) setPreview({ key, path });
       });
     }
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [key, applications]);
 

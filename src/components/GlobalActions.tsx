@@ -6,10 +6,12 @@ import { FolderForm } from "./FolderForm";
 import { AppBrowser } from "./AppBrowser";
 import { useViewMode } from "../hooks/useViewMode";
 import { perform } from "./feedback";
+import { nextViewMode, VIEW_MODE_LABELS } from "../services/view-preference";
 
 export function GlobalActions({ folderId }: { folderId: string | null }) {
   const { update, status, retry } = useLauncherState();
   const { mode, isLoading: viewLoading, setMode } = useViewMode();
+  const nextMode = nextViewMode(mode);
 
   async function reset() {
     if (
@@ -50,10 +52,16 @@ export function GlobalActions({ folderId }: { folderId: string | null }) {
         />
         {!viewLoading && (
           <Action
-            title={mode === "grid" ? "Switch to List View" : "Switch to Grid View"}
-            icon={mode === "grid" ? Icon.List : Icon.AppWindowGrid3x3}
+            title={`Switch to ${VIEW_MODE_LABELS[nextMode]} View`}
+            icon={
+              nextMode === "list"
+                ? Icon.List
+                : nextMode === "grid-large"
+                  ? Icon.AppWindowGrid2x2
+                  : Icon.AppWindowGrid3x3
+            }
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-            onAction={() => perform("Could Not Save View", () => setMode(mode === "grid" ? "list" : "grid"))}
+            onAction={() => perform("Could Not Save View", () => setMode(nextMode))}
           />
         )}
       </ActionPanel.Section>

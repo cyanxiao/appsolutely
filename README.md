@@ -33,9 +33,9 @@ npm run dev
 
 With development running, open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return opens the application or folder. Raycast supplies mouse interaction and native navigation. Escape clears active search first, then returns through the navigation stack to the parent folder.
 
-The compact eight-column grid uses Raycast's native application icons. Names appear in hover tooltips instead of below tiles; typing searches all installed applications. Folder previews are prepared separately in the background.
+The compact eight-column **Grid** uses Raycast's native application icons. Names appear in hover tooltips instead of below tiles; typing searches all installed applications. **Grid (Large)** uses six columns with high-resolution icons up to 512×512 and folder previews. High-resolution icons and previews load only while Grid (Large) is active; switching away stops queued icon work. **Grid** and **List** use native icons without preparing PNGs.
 
-Use **Switch to List View / Grid View** in the Action Panel (**⌘⇧V**) to change views. List view shows application and folder names alongside native icons. Appsolutely remembers your choice across Home, folders, search, and future launches.
+Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views through the Action Panel (**⌘⇧V**). List view shows application and folder names alongside native icons. Appsolutely remembers your choice across Home, folders, search, and future launches.
 
 ## Organize your apps
 
@@ -45,7 +45,7 @@ Use **Switch to List View / Grid View** in the Action Panel (**⌘⇧V**) to cha
 - Folders also have **Create Subfolder**, **Rename Folder**, **Move Folder**, and **Delete Folder** actions. Moving a folder preserves its contents. Moving it into itself or any descendant is prevented.
 - Deleting a folder deletes its subfolders and returns all contained apps to Home. It never deletes or uninstalls an application. Deletion and layout reset require confirmation.
 - Empty folders offer the same global actions as populated grids.
-- Folder icons preview up to nine of their applications in a 3×3 grid, like macOS Launchpad. Previews update automatically as you organize apps. Direct apps appear first; remaining slots can show apps from nested subfolders. Empty folders use the standard folder icon. [See the native folder preview screenshot](docs/screenshots/folder-preview.png).
+- In **Grid (Large)**, folder icons preview up to nine of their applications in a 3×3 grid, like macOS Launchpad. Previews update automatically as you organize apps. Direct apps appear first; remaining slots can show apps from nested subfolders. Empty folders and the other view modes use the standard folder icon. [See the native folder preview screenshot](docs/screenshots/folder-preview.png).
 
 | Shortcut | Action                                          |
 | -------- | ----------------------------------------------- |
@@ -58,7 +58,7 @@ Use **Switch to List View / Grid View** in the Action Panel (**⌘⇧V**) to cha
 | ⌘Return  | Show selected application in Finder             |
 | ⌘⇧F      | Open Search All Applications                    |
 | ⌘R       | Refresh installed applications                  |
-| ⌘⇧V      | Switch between grid and list views              |
+| ⌘⇧V      | Cycle Grid, Grid (Large), and List views        |
 | Escape   | Clear search / return through native navigation |
 
 ## Persistence and application identity

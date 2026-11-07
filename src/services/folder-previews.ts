@@ -150,15 +150,17 @@ export function folderPreview(
   entries: FolderPreviewEntry[],
   directory: string,
   iconDirectory?: string,
+  signal?: AbortSignal,
 ): Promise<string | undefined> {
-  if (!entries.length) return Promise.resolve(undefined);
+  if (!entries.length || signal?.aborted) return Promise.resolve(undefined);
   const visible = entries.slice(0, PREVIEW_LIMIT);
   const requestKey = JSON.stringify([directory, iconDirectory, visible]);
-  const existing = pending.get(requestKey);
+  const existing = signal ? undefined : pending.get(requestKey);
   if (existing) return existing;
   const task = renderQueue.then(async () => {
     let temporary: string | undefined;
     try {
+      if (signal?.aborted) return undefined;
       // Resolve only the miniature icons needed by this folder, outside catalog discovery.
       let resolved = visible;
       if (iconDirectory) {
@@ -169,7 +171,9 @@ export function folderPreview(
           (path, image) => {
             if (image) icons.set(path, image);
           },
+          signal,
         );
+        if (signal?.aborted) return undefined;
         resolved = visible.map((entry) => ({ ...entry, iconPath: icons.get(entry.appPath) }));
       }
       const key = join(directory, `${folderPreviewKey(resolved)}.png`);
@@ -182,6 +186,7 @@ export function folderPreview(
       const images = await Promise.all(
         resolved.map(async (entry) => (entry.iconPath ? readFile(entry.iconPath).catch(() => undefined) : undefined)),
       );
+      if (signal?.aborted) return undefined;
       const image = renderFolderPreview(images);
       await mkdir(directory, { recursive: true });
       temporary = join(directory, `${randomUUID()}.tmp`);
@@ -195,8 +200,8 @@ export function folderPreview(
       if (temporary) await rm(temporary, { force: true }).catch(() => undefined);
     }
   });
-  pending.set(requestKey, task);
+  if (!signal) pending.set(requestKey, task);
   renderQueue = task.catch(() => undefined);
-  void task.finally(() => pending.delete(requestKey));
+  if (!signal) void task.finally(() => pending.delete(requestKey));
   return task;
 }

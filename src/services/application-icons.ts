@@ -89,7 +89,7 @@ function imagePath(directory: string, key: string, source: string, sourceSignatu
 
 /**
  * Read the app bundle's full-resolution icon, resolving through AppKit if needed.
- * Missing/unsupported icons return undefined so previews can use a generic miniature.
+ * Missing/unsupported icons return undefined so views can use their fallback icons.
  */
 export async function applicationIcon(
   appPath: string,
@@ -188,14 +188,15 @@ export async function loadApplicationIcons(
   paths: string[],
   directory: string,
   onIcon: (appPath: string, image: string | undefined) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   let next = 0;
   await Promise.all(
     Array.from({ length: Math.min(4, paths.length) }, async () => {
-      while (next < paths.length) {
+      while (next < paths.length && !signal?.aborted) {
         const path = paths[next++];
         const image = await applicationIcon(path, directory);
-        onIcon(path, image);
+        if (!signal?.aborted) onIcon(path, image);
       }
     }),
   );

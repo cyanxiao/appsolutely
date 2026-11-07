@@ -3,12 +3,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useApplications } from "../hooks/useApplications";
 import { useLauncherState } from "../hooks/useLauncherState";
 import { useViewMode } from "../hooks/useViewMode";
+import { useApplicationIcons } from "../hooks/useApplicationIcons";
 import { assignmentFor, searchApplications } from "../services/application-model";
 import { folderPath } from "../utils/hierarchy";
 import { byOrderThenName } from "../utils/sorting";
 import { AppItem } from "./AppItem";
 import { FolderItem } from "./FolderItem";
 import { GlobalActions } from "./GlobalActions";
+import { perform } from "./feedback";
+import { isViewMode, VIEW_MODES, VIEW_MODE_LABELS } from "../services/view-preference";
+
+const viewIcons = { grid: Icon.AppWindowGrid3x3, "grid-large": Icon.AppWindowGrid2x2, list: Icon.List };
 
 export function AppBrowser({
   folderId = null,
@@ -19,7 +24,7 @@ export function AppBrowser({
 }) {
   const { applications, isLoading, error: applicationError } = useApplications();
   const { state, status, warning, error: storageError } = useLauncherState();
-  const { mode, isLoading: viewLoading, error: viewError } = useViewMode();
+  const { mode, isLoading: viewLoading, error: viewError, setMode } = useViewMode();
   const [searchText, setSearchText] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const searching = searchText.trim().length > 0;
@@ -64,10 +69,14 @@ export function AppBrowser({
       .map((app) => ({ ...app, order: assignmentFor(app, state)?.order ?? 0 }))
       .sort(byOrderThenName);
   }, [applications, state, currentFolder, searching, searchText]);
+  const largeGrid = mode === "grid-large";
+  const icons = useApplicationIcons(visibleApps, largeGrid && !viewLoading);
+  const iconsLoading = largeGrid && visibleApps.some((app) => !icons.has(app.path));
   const folders = searching ? [] : state.folders.filter((f) => f.parentId === currentFolder).sort(byOrderThenName);
   const error = applicationError ?? storageError;
 
   const EmptyView = mode === "list" ? List.EmptyView : Grid.EmptyView;
+  const Dropdown = mode === "list" ? List.Dropdown : Grid.Dropdown;
   const children = (
     <>
       <EmptyView
@@ -96,11 +105,20 @@ export function AppBrowser({
           <FolderItem key={folder.id} folder={folder} parentId={currentFolder} viewMode={mode} />
         ))}
       {!viewLoading &&
-        visibleApps.map((app) => <AppItem key={app.id} app={app} folderId={currentFolder} viewMode={mode} />)}
+        visibleApps.map((app) => (
+          <AppItem
+            key={app.id}
+            app={app}
+            folderId={currentFolder}
+            viewMode={mode}
+            iconPath={largeGrid ? icons.get(app.path) : undefined}
+            iconPending={largeGrid && !icons.has(app.path)}
+          />
+        ))}
     </>
   );
   const props = {
-    isLoading: isLoading || status === "loading" || viewLoading,
+    isLoading: isLoading || status === "loading" || viewLoading || iconsLoading,
     navigationTitle: searchMode ? "Search All Applications" : folderPath(state.folders, currentFolder),
     searchBarPlaceholder: "Search all applications…",
     searchText,
@@ -108,6 +126,23 @@ export function AppBrowser({
     selectedItemId: selectedItemId ?? undefined,
     onSelectionChange: setSelectedItemId,
     filtering: false,
+    searchBarAccessory: (
+      <Dropdown
+        id="appsolutely-view-mode"
+        tooltip="View"
+        value={mode}
+        storeValue={false}
+        onChange={(value) => {
+          if (isViewMode(value) && value !== mode) {
+            void perform("Could Not Save View", () => setMode(value));
+          }
+        }}
+      >
+        {VIEW_MODES.map((value) => (
+          <Dropdown.Item key={value} title={VIEW_MODE_LABELS[value]} value={value} icon={viewIcons[value]} />
+        ))}
+      </Dropdown>
+    ),
     actions,
   };
   // Mount the saved native view directly, and recreate it when the presentation changes.
@@ -117,7 +152,13 @@ export function AppBrowser({
       {children}
     </List>
   ) : (
-    <Grid key="grid" {...props} columns={8} inset={Grid.Inset.Large} fit={Grid.Fit.Contain}>
+    <Grid
+      key={mode}
+      {...props}
+      columns={largeGrid ? 6 : 8}
+      inset={largeGrid ? Grid.Inset.Medium : Grid.Inset.Large}
+      fit={Grid.Fit.Contain}
+    >
       {children}
     </Grid>
   );
