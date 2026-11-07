@@ -1,8 +1,8 @@
 # Appsolutely
 
-**All your apps. Appsolutely organized.**
+**Miss good old App Launchpad on macOS 27?**
 
-A Launchpad-inspired launcher for Raycast. Browse installed macOS applications in a clean grid and organize them into folders and nested subfolders. Apps first. Search second.
+A Launchpad-inspired launcher for Raycast.
 
 ![Appsolutely Home showing installed applications in Raycast](docs/screenshots/appsolutely.png)
 
