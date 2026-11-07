@@ -22,20 +22,13 @@ A Launchpad-inspired launcher for Raycast.
 
 </details>
 
-## Run locally
+## Features
 
-Requires macOS, Raycast, and Node.js **24 or newer** with npm. This project uses the current stable Raycast SDK, locked in `package-lock.json`.
+Open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return opens the application or folder. Escape clears active search first, then returns to the parent folder.
 
-```sh
-npm ci
-npm run dev
-```
+Browse applications in a compact eight-column **Grid**, a six-column **Grid (Large)** with high-resolution icons and folder previews, or a **List** with application and folder names. Grid names appear in hover tooltips; typing searches all installed applications, including apps inside folders.
 
-With development running, open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return opens the application or folder. Raycast supplies mouse interaction and native navigation. Escape clears active search first, then returns through the navigation stack to the parent folder.
-
-The compact eight-column **Grid** uses Raycast's native application icons. Names appear in hover tooltips instead of below tiles; typing searches all installed applications. **Grid (Large)** uses six columns with high-resolution icons up to 512×512 and folder previews. High-resolution icons and previews load only while Grid (Large) is active; switching away stops queued icon work. **Grid** and **List** use native icons without preparing PNGs.
-
-Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views through the Action Panel (**⌘⇧V**). List view shows application and folder names alongside native icons. Appsolutely remembers your choice across Home, folders, search, and future launches.
+Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views through the Action Panel (**⌘⇧V**). Appsolutely remembers your choice across Home, folders, search, and future launches.
 
 ## Organize your apps
 
@@ -45,7 +38,7 @@ Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views
 - Folders also have **Create Subfolder**, **Rename Folder**, **Move Folder**, and **Delete Folder** actions. Moving a folder preserves its contents. Moving it into itself or any descendant is prevented.
 - Deleting a folder deletes its subfolders and returns all contained apps to Home. It never deletes or uninstalls an application. Deletion and layout reset require confirmation.
 - Empty folders offer the same global actions as populated grids.
-- In **Grid (Large)**, folder icons preview up to nine of their applications in a 3×3 grid, like macOS Launchpad. Previews update automatically as you organize apps. Direct apps appear first; remaining slots can show apps from nested subfolders. Empty folders and the other view modes use the standard folder icon. [See the native folder preview screenshot](docs/screenshots/folder-preview.png).
+- In **Grid (Large)**, folder icons preview up to nine applications, including apps in nested subfolders. Previews update automatically as you organize apps. Empty folders and the other view modes use the standard folder icon.
 
 | Shortcut | Action                                          |
 | -------- | ----------------------------------------------- |
@@ -58,24 +51,21 @@ Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views
 | ⌘Return  | Show selected application in Finder             |
 | ⌘⇧F      | Open Search All Applications                    |
 | ⌘R       | Refresh installed applications                  |
-| ⌘⇧V      | Cycle Grid, Grid (Large), and List views        |
+| ⌘⇧V      | Cycle Grid, Grid (Large), and List views         |
 | Escape   | Clear search / return through native navigation |
 
-## Persistence and application identity
+Your app organization is saved locally. Resetting the layout keeps your selected view. See [Privacy](docs/PRIVACY.md) for details about local data.
 
-Organization is stored exclusively in Raycast `LocalStorage` under `appsolutely.layout`, using schema version 1. No network requests, accounts, analytics, or additional permissions are used at runtime.
+## Run locally
 
-The selected view is saved separately under `appsolutely.viewMode`; resetting your layout keeps this preference.
+Requires macOS, Raycast, and Node.js **24 or newer** with npm.
 
-See [Privacy](docs/PRIVACY.md) for the data kept locally and the repository sharing review.
+```sh
+npm ci
+npm run dev
+```
 
-- Every navigation view observes one shared layout and application catalog.
-- Saves are serialized. Each operation reads the most recently saved layout, writes it immediately, and updates all open views only after storage succeeds. Failed writes leave the last saved layout visible and report the failure.
-- Folder and application order values are persisted. Folders appear first, in creation order; apps are alphabetical by default. Manual reordering is outside this MVP.
-- Bundle IDs retain assignments across renames and reinstallations; apps without bundle IDs use their normalized paths. Missing apps keep their saved assignments and disappear from the grid until discovered again. New apps start at Home.
-- Repeated discovery records at the same normalized path are collapsed. Distinct paths sharing one bundle ID remain separate, display their installation directories, and can be moved independently. Path-specific assignments take precedence over bundle-level assignments. A copied installation uses its path identity; moving that copy to another path may require assigning it again.
-- Paths retain case for case-sensitive macOS volumes. Filesystem aliases and symlinks are not resolved, so discovery aliases at different paths may remain visible separately.
-- Malformed data, duplicate IDs, missing references, and folder cycles are repaired. Before edits are enabled, the original is backed up to a timestamped `appsolutely.layout.recovery.*` key. Unknown schema versions are protected from overwrite. Unversioned/v0 drafts migrate to v1 on the next save.
+With development running, open Raycast and select **Open Appsolutely**.
 
 ## Development and validation
 
