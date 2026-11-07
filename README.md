@@ -1,6 +1,6 @@
 # Appsolutely
 
-**Miss good old App Launchpad on macOS 27?**
+**Miss good old App Launchpad before macOS 27?**
 
 A Launchpad-inspired launcher for Raycast.
 
