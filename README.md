@@ -9,19 +9,6 @@ A Launchpad-inspired launcher for Raycast.
 
 ![Appsolutely Home showing installed applications in Raycast](docs/screenshots/appsolutely.png)
 
-<details>
-<summary>More screenshots: folder previews and search</summary>
-
-**Folder previews** — folder icons combine the applications inside them.
-
-![A folder icon previewing six stock macOS applications](docs/screenshots/folder-preview.png)
-
-**Global search** — find any installed application, including apps inside folders.
-
-![Searching for Books in Appsolutely](docs/screenshots/search.png)
-
-</details>
-
 ## Features
 
 Open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return opens the application or folder. Escape clears active search first, then returns to the parent folder.
