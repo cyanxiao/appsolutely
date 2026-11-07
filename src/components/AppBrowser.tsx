@@ -65,8 +65,9 @@ export function AppBrowser({
   const visibleApps = useMemo(() => {
     if (searching) return searchApplications(applications, searchText);
     return applications
-      .filter((app) => (assignmentFor(app, state)?.folderId ?? null) === currentFolder)
-      .map((app) => ({ ...app, order: assignmentFor(app, state)?.order ?? 0 }))
+      .map((app) => ({ app, assignment: assignmentFor(app, state) }))
+      .filter(({ assignment }) => (assignment?.folderId ?? null) === currentFolder)
+      .map(({ app, assignment }) => ({ ...app, order: assignment?.order ?? 0 }))
       .sort(byOrderThenName);
   }, [applications, state, currentFolder, searching, searchText]);
   const largeGrid = mode === "grid-large";

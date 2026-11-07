@@ -151,57 +151,71 @@ export function folderPreview(
   directory: string,
   iconDirectory?: string,
   signal?: AbortSignal,
+  resolveIcons?: (paths: string[], signal?: AbortSignal) => Promise<ReadonlyMap<string, string | undefined>>,
 ): Promise<string | undefined> {
   if (!entries.length || signal?.aborted) return Promise.resolve(undefined);
   const visible = entries.slice(0, PREVIEW_LIMIT);
   const requestKey = JSON.stringify([directory, iconDirectory, visible]);
   const existing = signal ? undefined : pending.get(requestKey);
   if (existing) return existing;
-  const task = renderQueue.then(async () => {
-    let temporary: string | undefined;
-    try {
-      if (signal?.aborted) return undefined;
-      // Resolve only the miniature icons needed by this folder, outside catalog discovery.
-      let resolved = visible;
-      if (iconDirectory) {
-        const icons = new Map<string, string>();
-        await loadApplicationIcons(
-          visible.map((entry) => entry.appPath),
-          iconDirectory,
-          (path, image) => {
-            if (image) icons.set(path, image);
-          },
-          signal,
-        );
-        if (signal?.aborted) return undefined;
-        resolved = visible.map((entry) => ({ ...entry, iconPath: icons.get(entry.appPath) }));
-      }
-      const key = join(directory, `${folderPreviewKey(resolved)}.png`);
-      try {
-        const cached = PNG.sync.read(await readFile(key));
-        if (cached.width === SIZE && cached.height === SIZE) return key;
-      } catch {
-        // An absent or corrupt preview is regenerated from its app icons.
-      }
-      const images = await Promise.all(
-        resolved.map(async (entry) => (entry.iconPath ? readFile(entry.iconPath).catch(() => undefined) : undefined)),
+  const prepare = async () => {
+    if (!iconDirectory || signal?.aborted) return visible;
+    if (resolveIcons) {
+      const icons = await resolveIcons(
+        visible.map((entry) => entry.appPath),
+        signal,
       );
-      if (signal?.aborted) return undefined;
-      const image = renderFolderPreview(images);
-      await mkdir(directory, { recursive: true });
-      temporary = join(directory, `${randomUUID()}.tmp`);
-      await writeFile(temporary, image);
-      await rename(temporary, key);
-      return key;
-    } catch {
-      // Unavailable storage must leave the folder usable with its native icon.
-      return undefined;
-    } finally {
-      if (temporary) await rm(temporary, { force: true }).catch(() => undefined);
+      return visible.map((entry) => ({ ...entry, iconPath: icons.get(entry.appPath) }));
     }
-  });
+    const icons = new Map<string, string>();
+    await loadApplicationIcons(
+      visible.map((entry) => entry.appPath),
+      iconDirectory,
+      (path, image) => {
+        if (image) icons.set(path, image);
+      },
+      signal,
+    );
+    return visible.map((entry) => ({ ...entry, iconPath: icons.get(entry.appPath) }));
+  };
+  const task = Promise.resolve()
+    .then(prepare)
+    .then((resolved) => {
+      const rendering = renderQueue.then(async () => {
+        let temporary: string | undefined;
+        try {
+          if (signal?.aborted) return undefined;
+          const key = join(directory, `${folderPreviewKey(resolved)}.png`);
+          try {
+            const cached = PNG.sync.read(await readFile(key));
+            if (cached.width === SIZE && cached.height === SIZE) return key;
+          } catch {
+            // An absent or corrupt preview is regenerated from its app icons.
+          }
+          const images = await Promise.all(
+            resolved.map(async (entry) =>
+              entry.iconPath ? readFile(entry.iconPath).catch(() => undefined) : undefined,
+            ),
+          );
+          if (signal?.aborted) return undefined;
+          const image = renderFolderPreview(images);
+          await mkdir(directory, { recursive: true });
+          temporary = join(directory, `${randomUUID()}.tmp`);
+          await writeFile(temporary, image);
+          await rename(temporary, key);
+          return key;
+        } catch {
+          // Unavailable storage must leave the folder usable with its native icon.
+          return undefined;
+        } finally {
+          if (temporary) await rm(temporary, { force: true }).catch(() => undefined);
+        }
+      });
+      renderQueue = rendering.catch(() => undefined);
+      return rendering;
+    })
+    .catch(() => undefined);
   if (!signal) pending.set(requestKey, task);
-  renderQueue = task.catch(() => undefined);
   if (!signal) void task.finally(() => pending.delete(requestKey));
   return task;
 }

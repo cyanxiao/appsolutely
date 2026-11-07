@@ -2,6 +2,7 @@ import { environment } from "@raycast/api";
 import { join } from "node:path";
 import { useEffect, useMemo, useState } from "react";
 import { folderPreview, folderPreviewEntries, type FolderPreviewEntry } from "../services/folder-previews";
+import { applicationIconStore } from "../services/applications";
 import { useApplications } from "./useApplications";
 import { useLauncherState } from "./useLauncherState";
 
@@ -25,6 +26,7 @@ export function useFolderPreview(folderId: string, enabled = true): string | und
         join(environment.supportPath, "folder-previews-v1"),
         join(environment.supportPath, "icons-v1"),
         controller.signal,
+        applicationIconStore.resolve,
       ).then((path) => {
         if (!cancelled && path) setPreview({ key, path });
       });

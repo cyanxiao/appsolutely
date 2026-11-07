@@ -123,3 +123,23 @@ test("leaving large view prevents a queued folder preview from loading icons or 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("a slow icon lookup does not block another folder preview", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "appsolutely-parallel-previews-"));
+  try {
+    const icon = join(directory, "app.png");
+    await writeFile(icon, solidPNG(0, 120, 240));
+    let finish!: (icons: ReadonlyMap<string, string | undefined>) => void;
+    const resolveIcons = (paths: string[]) =>
+      paths[0] === "slow"
+        ? new Promise<ReadonlyMap<string, string | undefined>>((resolve) => (finish = resolve))
+        : Promise.resolve(new Map([[paths[0], icon]]));
+    const slow = folderPreview([{ appPath: "slow" }], directory, directory, undefined, resolveIcons);
+    const fast = folderPreview([{ appPath: "fast" }], directory, directory, undefined, resolveIcons);
+    assert.ok(await fast);
+    finish(new Map([["slow", icon]]));
+    assert.ok(await slow);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

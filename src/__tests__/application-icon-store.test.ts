@@ -87,9 +87,13 @@ test("unavailable icons settle to native fallback independently of successful ic
   release();
 });
 
-test("returning to large view preserves displayed icons while revalidating their cache", async () => {
+test("returning to large view reuses icons until the catalog is refreshed", async () => {
   let image = "/cache/editor.png";
-  const store = new ApplicationIconStore(async () => image);
+  let calls = 0;
+  const store = new ApplicationIconStore(async () => {
+    calls++;
+    return image;
+  });
   const first = store.acquire(["Editor"]);
   await tick();
   first();
@@ -97,6 +101,60 @@ test("returning to large view preserves displayed icons while revalidating their
   const second = store.acquire(["Editor"]);
   assert.equal(store.getSnapshot().get("Editor"), "/cache/editor.png");
   await tick();
+  assert.equal(calls, 1);
+  store.invalidate();
+  await tick();
   assert.equal(store.getSnapshot().get("Editor"), image);
+  assert.equal(calls, 2);
   second();
+});
+
+test("preview and grid share in-flight work and cancellation releases preview requests", async () => {
+  const calls: string[] = [];
+  const finish = new Map<string, (image: string) => void>();
+  const store = new ApplicationIconStore((path) => {
+    calls.push(path);
+    return new Promise((resolve) => finish.set(path, resolve));
+  });
+  const grid = store.acquire(["Editor"]);
+  const preview = store.resolve(["Editor"]);
+  await tick();
+  assert.deepEqual(calls, ["Editor"]);
+  finish.get("Editor")!("/cache/editor.png");
+  assert.equal((await preview).get("Editor"), "/cache/editor.png");
+  grid();
+
+  const controller = new AbortController();
+  const cancelled = store.resolve(["Cancelled"], controller.signal);
+  controller.abort();
+  assert.equal((await cancelled).size, 0);
+  await tick();
+  assert.deepEqual(calls, ["Editor"]);
+});
+
+test("refresh during an in-flight request discards the old result and reloads it", async () => {
+  const finish: ((image: string) => void)[] = [];
+  const store = new ApplicationIconStore(() => new Promise((resolve) => finish.push(resolve)));
+  const release = store.acquire(["Editor"]);
+  await tick();
+  store.invalidate();
+  finish[0]("old.png");
+  await tick();
+  assert.equal(store.getSnapshot().has("Editor"), false);
+  assert.equal(finish.length, 2);
+  finish[1]("new.png");
+  await tick();
+  assert.equal(store.getSnapshot().get("Editor"), "new.png");
+  release();
+});
+
+test("icon completions are batched into one subscriber notification", async () => {
+  const store = new ApplicationIconStore(async (path) => path);
+  let notifications = 0;
+  const unsubscribe = store.subscribe(() => notifications++);
+  const release = store.acquire(["A", "B", "C"]);
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  assert.equal(notifications, 1);
+  release();
+  unsubscribe();
 });
