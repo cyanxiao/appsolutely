@@ -3,6 +3,7 @@ dist/
 .DS_Store
 *.tsbuildinfo
 raycast-env.d.ts
+docs/VALIDATION.md
 
 # Local settings, credentials, and private runtime data
 .env

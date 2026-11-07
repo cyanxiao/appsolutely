@@ -19,8 +19,6 @@ A Launchpad-inspired launcher for Raycast.
 
 </details>
 
-The cover screenshot was supplied by the project owner. Additional examples use temporary demonstration folders and stock macOS apps. See the [screenshot files and embedding examples](docs/screenshots/README.md).
-
 ## Run locally
 
 Requires macOS, Raycast, and Node.js **24 or newer** with npm. This project uses the current stable Raycast SDK, locked in `package-lock.json`.
@@ -117,18 +115,9 @@ assets/extension-icon.png    Original 512×512 icon
 6. Install, remove, or rename an app and refresh. Confirm layout survives and missing apps are hidden.
 7. Reset the layout, checking both Cancel and Reset. Check empty-folder actions and both Raycast appearance themes.
 
-Real development screenshots of Home, folders, and a nested application are included in `docs/screenshots/`. See `docs/VALIDATION.md` for the completed native checks. These are raw window captures, not the final Store image format.
+Real development screenshots of Home, folders, and a nested application are included in `docs/screenshots/`. These are raw window captures, not the final Store image format.
 
 For submission, capture screenshots with Raycast's **Capture Window** command, using **Save to Metadata**. Capture Home, nested folders, and the organization Action Panel; use consistent themes/backgrounds. Place the resulting `appsolutely-1.png`, `appsolutely-2.png`, and `appsolutely-3.png` in `metadata/`. Raycast recommends 2000×1250 PNG images and up to six screenshots.
-
-## Before Raycast Store submission
-
-Nothing is published automatically. The package includes Store fields, command metadata, keywords, a license, changelog, and the original icon.
-
-- Verify that `author` in `package.json` is **your intended Raycast Store username** before submission.
-- Complete the native smoke test above on your macOS/Raycast version, including both themes, launching, navigation, and user-directory apps.
-- Add Store-formatted screenshots in `metadata/`; the README already includes raw native captures.
-- Run the four validation commands above. Authenticate with Raycast only when you are ready to submit through the official publishing workflow.
 
 This extension uses native Raycast UI. Raycast controls window dimensions and Escape behavior; this does not replace Root Search or macOS Launchpad. Drag-and-drop, manual reordering, cloud sync, and app uninstallation are intentionally out of scope.
 
