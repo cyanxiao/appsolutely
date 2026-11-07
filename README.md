@@ -4,7 +4,7 @@
 
 A Launchpad-inspired launcher for Raycast. Browse installed macOS applications in a clean grid and organize them into folders and nested subfolders. Apps first. Search second.
 
-![Appsolutely application grid showing stock macOS apps in a demonstration folder](docs/screenshots/launcher.png)
+![Appsolutely Home showing installed applications in Raycast](docs/screenshots/appsolutely.png)
 
 <details>
 <summary>More screenshots: folder previews and search</summary>
@@ -19,7 +19,7 @@ A Launchpad-inspired launcher for Raycast. Browse installed macOS applications i
 
 </details>
 
-The screenshots use temporary demonstration folders and stock macOS apps so they do not disclose a personal application inventory. See the [screenshot files and embedding examples](docs/screenshots/README.md).
+The cover screenshot was supplied by the project owner. Additional examples use temporary demonstration folders and stock macOS apps. See the [screenshot files and embedding examples](docs/screenshots/README.md).
 
 ## Run locally
 

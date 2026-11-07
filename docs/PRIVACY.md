@@ -15,8 +15,8 @@ Development tooling is separate: npm downloads dependencies, Raycast lint fetche
 The files selected for the initial repository upload were reviewed for credentials, private keys, personal filesystem paths, account details, runtime data, and screenshot metadata.
 
 - No credential, private key, personal home-directory path, or private email address was found embedded in the project files selected for upload. Test paths use synthetic examples.
-- Screenshots revealing third-party application inventory were replaced with stock macOS apps in a temporary demonstration layout. Old inventory captures are excluded from the repository.
-- Included PNG files were re-encoded to remove metadata and checked visually. The captures show only the extension window.
+- Initial screenshots revealing third-party application inventory were replaced with stock macOS apps in a temporary demonstration layout. The project owner subsequently selected a Home screenshot for the README cover; that image intentionally includes visible application names, icons, and desktop wallpaper. It was included at the owner's explicit request.
+- Included PNG files were re-encoded to remove metadata and checked visually. The demonstration captures show only the extension window; the owner-supplied cover also includes surrounding wallpaper. Re-encoding preserves the image pixels.
 - Local settings, environment files, credential files, dependency directories, generated output, and runtime caches are excluded by `.gitignore`.
 - The package's Raycast author handle is intentional Store metadata. Git commit attribution uses the existing Git configuration, as requested by the repository owner; that name and email are visible in commit history to anyone with repository access.
 
