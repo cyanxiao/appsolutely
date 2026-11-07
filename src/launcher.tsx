@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { AppGrid } from "./components/AppGrid";
+import { AppBrowser } from "./components/AppBrowser";
 import { applicationStore } from "./services/applications";
 
 export default function Command() {
   useEffect(() => {
     void applicationStore.refresh();
   }, []);
-  return <AppGrid />;
+  return <AppBrowser />;
 }

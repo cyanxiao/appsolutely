@@ -1,17 +1,26 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Grid, Icon, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Grid, Icon, Keyboard, List } from "@raycast/api";
 import type { Folder } from "../models/folder";
 import { useLauncherState } from "../hooks/useLauncherState";
 import { useFolderPreview } from "../hooks/useFolderPreview";
 import { deleteFolder } from "../utils/hierarchy";
-import { AppGrid } from "./AppGrid";
+import { AppBrowser } from "./AppBrowser";
 import { FolderForm } from "./FolderForm";
 import { FolderPicker } from "./FolderPicker";
 import { GlobalActions } from "./GlobalActions";
 import { perform } from "./feedback";
+import type { ViewMode } from "../services/view-preference";
 
-export function FolderItem({ folder, parentId }: { folder: Folder; parentId: string | null }) {
+export function FolderItem({
+  folder,
+  parentId,
+  viewMode,
+}: {
+  folder: Folder;
+  parentId: string | null;
+  viewMode: ViewMode;
+}) {
   const { update } = useLauncherState();
-  const preview = useFolderPreview(folder.id);
+  const preview = useFolderPreview(folder.id, viewMode === "grid");
 
   async function remove() {
     if (
@@ -26,39 +35,49 @@ export function FolderItem({ folder, parentId }: { folder: Folder; parentId: str
     }
   }
 
-  return (
-    <Grid.Item
+  const actions = (
+    <ActionPanel title={folder.name}>
+      <Action.Push title="Open Folder" icon={Icon.Folder} target={<AppBrowser folderId={folder.id} />} />
+      <ActionPanel.Section title="Organize">
+        <Action.Push title="Create Subfolder" icon={Icon.NewFolder} target={<FolderForm parentId={folder.id} />} />
+        <Action.Push
+          title="Rename Folder"
+          icon={Icon.Pencil}
+          shortcut={Keyboard.Shortcut.Common.Edit}
+          target={<FolderForm parentId={folder.parentId} folder={folder} />}
+        />
+        <Action.Push
+          title="Move Folder"
+          icon={Icon.Folder}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          target={<FolderPicker folderId={folder.id} />}
+        />
+        <Action
+          title="Delete Folder"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={remove}
+        />
+      </ActionPanel.Section>
+      <GlobalActions folderId={parentId} />
+    </ActionPanel>
+  );
+  return viewMode === "list" ? (
+    <List.Item
       id={`folder:${folder.id}`}
       title={folder.name}
-      content={preview ? { source: preview } : { source: Icon.Folder, tintColor: Color.Blue }}
-      actions={
-        <ActionPanel>
-          <Action.Push title="Open Folder" icon={Icon.Folder} target={<AppGrid folderId={folder.id} />} />
-          <ActionPanel.Section title="Organize">
-            <Action.Push title="Create Subfolder" icon={Icon.NewFolder} target={<FolderForm parentId={folder.id} />} />
-            <Action.Push
-              title="Rename Folder"
-              icon={Icon.Pencil}
-              shortcut={Keyboard.Shortcut.Common.Edit}
-              target={<FolderForm parentId={folder.parentId} folder={folder} />}
-            />
-            <Action.Push
-              title="Move Folder"
-              icon={Icon.Folder}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-              target={<FolderPicker folderId={folder.id} />}
-            />
-            <Action
-              title="Delete Folder"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={remove}
-            />
-          </ActionPanel.Section>
-          <GlobalActions folderId={parentId} />
-        </ActionPanel>
-      }
+      icon={{ source: Icon.Folder, tintColor: Color.Blue }}
+      actions={actions}
+    />
+  ) : (
+    <Grid.Item
+      id={`folder:${folder.id}`}
+      content={{
+        value: preview ? { source: preview } : { source: Icon.Folder, tintColor: Color.Blue },
+        tooltip: folder.name,
+      }}
+      actions={actions}
     />
   );
 }

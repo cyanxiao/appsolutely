@@ -7,6 +7,7 @@ import type { LauncherState } from "../models/folder.ts";
 import { descendants } from "../utils/hierarchy.ts";
 import { byOrderThenName } from "../utils/sorting.ts";
 import { assignmentFor } from "./application-model.ts";
+import { loadApplicationIcons } from "./application-icons.ts";
 
 const SIZE = 512;
 const PREVIEW_LIMIT = 9;
@@ -38,7 +39,7 @@ export function folderPreviewEntries(
         a.app.path.localeCompare(b.app.path),
     )
     .slice(0, PREVIEW_LIMIT)
-    .map(({ app }) => ({ appPath: app.path, iconPath: app.iconPath }));
+    .map(({ app }) => ({ appPath: app.path }));
 }
 
 export function folderPreviewKey(entries: FolderPreviewEntry[]): string {
@@ -145,15 +146,33 @@ const pending = new Map<string, Promise<string | undefined>>();
 // Serialize rendering to bound memory when many folders are visible at once.
 let renderQueue: Promise<unknown> = Promise.resolve();
 
-export function folderPreview(entries: FolderPreviewEntry[], directory: string): Promise<string | undefined> {
+export function folderPreview(
+  entries: FolderPreviewEntry[],
+  directory: string,
+  iconDirectory?: string,
+): Promise<string | undefined> {
   if (!entries.length) return Promise.resolve(undefined);
   const visible = entries.slice(0, PREVIEW_LIMIT);
-  const key = join(directory, `${folderPreviewKey(visible)}.png`);
-  const existing = pending.get(key);
+  const requestKey = JSON.stringify([directory, iconDirectory, visible]);
+  const existing = pending.get(requestKey);
   if (existing) return existing;
   const task = renderQueue.then(async () => {
     let temporary: string | undefined;
     try {
+      // Resolve only the miniature icons needed by this folder, outside catalog discovery.
+      let resolved = visible;
+      if (iconDirectory) {
+        const icons = new Map<string, string>();
+        await loadApplicationIcons(
+          visible.map((entry) => entry.appPath),
+          iconDirectory,
+          (path, image) => {
+            if (image) icons.set(path, image);
+          },
+        );
+        resolved = visible.map((entry) => ({ ...entry, iconPath: icons.get(entry.appPath) }));
+      }
+      const key = join(directory, `${folderPreviewKey(resolved)}.png`);
       try {
         const cached = PNG.sync.read(await readFile(key));
         if (cached.width === SIZE && cached.height === SIZE) return key;
@@ -161,7 +180,7 @@ export function folderPreview(entries: FolderPreviewEntry[], directory: string):
         // An absent or corrupt preview is regenerated from its app icons.
       }
       const images = await Promise.all(
-        visible.map(async (entry) => (entry.iconPath ? readFile(entry.iconPath).catch(() => undefined) : undefined)),
+        resolved.map(async (entry) => (entry.iconPath ? readFile(entry.iconPath).catch(() => undefined) : undefined)),
       );
       const image = renderFolderPreview(images);
       await mkdir(directory, { recursive: true });
@@ -176,8 +195,8 @@ export function folderPreview(entries: FolderPreviewEntry[], directory: string):
       if (temporary) await rm(temporary, { force: true }).catch(() => undefined);
     }
   });
-  pending.set(key, task);
+  pending.set(requestKey, task);
   renderQueue = task.catch(() => undefined);
-  void task.finally(() => pending.delete(key));
+  void task.finally(() => pending.delete(requestKey));
   return task;
 }

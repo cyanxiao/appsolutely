@@ -12,6 +12,7 @@ import {
   isUsableApplicationIcon,
   loadApplicationIcons,
 } from "../services/application-icons.ts";
+import { folderPreview, renderFolderPreview } from "../services/folder-previews.ts";
 
 const run = promisify(execFile);
 
@@ -80,6 +81,35 @@ async function fixture() {
 }
 
 test(
+  "folder previews resolve their icons on demand and invalidate when the source changes",
+  {
+    skip: process.platform !== "darwin",
+  },
+  async () => {
+    const { directory, appPath, cache, source } = await fixture();
+    try {
+      const entries = [{ appPath }];
+      const previews = join(directory, "previews");
+      const preview = await folderPreview(entries, previews, cache);
+      assert.ok(preview);
+      const icon = await applicationIcon(appPath, cache);
+      assert.ok(icon);
+      assert.deepEqual(await readFile(preview), renderFolderPreview([await readFile(icon)]));
+      const timestamp = (await stat(preview)).mtimeMs;
+      assert.equal(await folderPreview(entries, previews, cache), preview);
+      assert.equal((await stat(preview)).mtimeMs, timestamp);
+      const changed = new Date(Date.now() + 2000);
+      await utimes(source, changed, changed);
+      const updated = await folderPreview(entries, previews, cache);
+      assert.ok(updated);
+      assert.notEqual(updated, preview);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
+test(
   "native extraction preserves 512px resolution and alpha, reuses cache, and invalidates updated icons",
   {
     skip: process.platform !== "darwin",
@@ -127,7 +157,12 @@ test(
     try {
       const found = new Map<string, string>();
       const missing = join(directory, "Missing.app");
-      await loadApplicationIcons([missing, appPath], cache, (path, image) => found.set(path, image));
+      const settled: string[] = [];
+      await loadApplicationIcons([missing, appPath], cache, (path, image) => {
+        settled.push(path);
+        if (image) found.set(path, image);
+      });
+      assert.deepEqual(settled.sort(), [missing, appPath].sort());
       assert.equal(found.size, 1);
       assert.ok(found.has(appPath));
       const original = await readFile(source);

@@ -5,11 +5,13 @@ import { folderPreview, folderPreviewEntries, type FolderPreviewEntry } from "..
 import { useApplications } from "./useApplications";
 import { useLauncherState } from "./useLauncherState";
 
-export function useFolderPreview(folderId: string): string | undefined {
+export function useFolderPreview(folderId: string, enabled = true): string | undefined {
   const { applications } = useApplications();
   const { state } = useLauncherState();
-  const entries = useMemo(() => folderPreviewEntries(folderId, applications, state), [folderId, applications, state]);
-  // Ignore unrelated application-icon updates elsewhere in the catalog.
+  const entries = useMemo(
+    () => (enabled ? folderPreviewEntries(folderId, applications, state) : []),
+    [folderId, applications, state, enabled],
+  );
   const key = JSON.stringify(entries);
   const [preview, setPreview] = useState<{ key: string; path: string }>();
 
@@ -17,14 +19,18 @@ export function useFolderPreview(folderId: string): string | undefined {
     let cancelled = false;
     const requestedEntries: FolderPreviewEntry[] = JSON.parse(key);
     if (requestedEntries.length) {
-      void folderPreview(requestedEntries, join(environment.supportPath, "folder-previews-v1")).then((path) => {
+      void folderPreview(
+        requestedEntries,
+        join(environment.supportPath, "folder-previews-v1"),
+        join(environment.supportPath, "icons-v1"),
+      ).then((path) => {
         if (!cancelled && path) setPreview({ key, path });
       });
     }
     return () => {
       cancelled = true;
     };
-  }, [key]);
+  }, [key, applications]);
 
   return entries.length && preview?.key === key ? preview.path : undefined;
 }

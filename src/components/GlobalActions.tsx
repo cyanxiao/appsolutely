@@ -3,11 +3,13 @@ import { useLauncherState } from "../hooks/useLauncherState";
 import { applicationStore } from "../services/applications";
 import { emptyState } from "../models/folder";
 import { FolderForm } from "./FolderForm";
-import { AppGrid } from "./AppGrid";
+import { AppBrowser } from "./AppBrowser";
+import { useViewMode } from "../hooks/useViewMode";
 import { perform } from "./feedback";
 
 export function GlobalActions({ folderId }: { folderId: string | null }) {
   const { update, status, retry } = useLauncherState();
+  const { mode, isLoading: viewLoading, setMode } = useViewMode();
 
   async function reset() {
     if (
@@ -38,7 +40,7 @@ export function GlobalActions({ folderId }: { folderId: string | null }) {
           title="Search All Applications"
           icon={Icon.MagnifyingGlass}
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          target={<AppGrid folderId={folderId} searchMode />}
+          target={<AppBrowser folderId={folderId} searchMode />}
         />
         <Action
           title="Refresh Applications"
@@ -46,6 +48,14 @@ export function GlobalActions({ folderId }: { folderId: string | null }) {
           shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={applicationStore.refresh}
         />
+        {!viewLoading && (
+          <Action
+            title={mode === "grid" ? "Switch to List View" : "Switch to Grid View"}
+            icon={mode === "grid" ? Icon.List : Icon.AppWindowGrid3x3}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            onAction={() => perform("Could Not Save View", () => setMode(mode === "grid" ? "list" : "grid"))}
+          />
+        )}
       </ActionPanel.Section>
       {status === "ready" && (
         <ActionPanel.Section>

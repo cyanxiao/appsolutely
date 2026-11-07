@@ -33,6 +33,10 @@ npm run dev
 
 With development running, open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return opens the application or folder. Raycast supplies mouse interaction and native navigation. Escape clears active search first, then returns through the navigation stack to the parent folder.
 
+The compact eight-column grid uses Raycast's native application icons. Names appear in hover tooltips instead of below tiles; typing searches all installed applications. Folder previews are prepared separately in the background.
+
+Use **Switch to List View / Grid View** in the Action Panel (**⌘⇧V**) to change views. List view shows application and folder names alongside native icons. Appsolutely remembers your choice across Home, folders, search, and future launches.
+
 ## Organize your apps
 
 - Open the Action Panel with **⌘K** for the selected app or folder.
@@ -54,11 +58,14 @@ With development running, open Raycast and select **Open Appsolutely**. Arrow ke
 | ⌘Return  | Show selected application in Finder             |
 | ⌘⇧F      | Open Search All Applications                    |
 | ⌘R       | Refresh installed applications                  |
+| ⌘⇧V      | Switch between grid and list views              |
 | Escape   | Clear search / return through native navigation |
 
 ## Persistence and application identity
 
 Organization is stored exclusively in Raycast `LocalStorage` under `appsolutely.layout`, using schema version 1. No network requests, accounts, analytics, or additional permissions are used at runtime.
+
+The selected view is saved separately under `appsolutely.viewMode`; resetting your layout keeps this preference.
 
 See [Privacy](docs/PRIVACY.md) for the data kept locally and the repository sharing review.
 

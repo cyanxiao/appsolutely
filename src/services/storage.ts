@@ -1,7 +1,12 @@
 import { LocalStorage } from "@raycast/api";
 import { LayoutRepository } from "./state-repository.ts";
+import type { StorageAdapter } from "./state-repository.ts";
+import { ViewPreference } from "./view-preference.ts";
 
-export const layoutRepository = new LayoutRepository({
+const storage: StorageAdapter = {
   getItem: (key) => LocalStorage.getItem<string>(key),
   setItem: (key, value) => LocalStorage.setItem(key, value),
-});
+};
+
+export const layoutRepository = new LayoutRepository(storage);
+export const viewPreference = new ViewPreference(storage);

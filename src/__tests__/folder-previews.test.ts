@@ -50,7 +50,7 @@ test("nested-only previews include descendants and change when apps move or disa
   const [app] = prepareApplications([{ name: "Editor", path: "/Applications/Editor.app", bundleId: "editor" }]);
   state = moveApplication(state, app, "child");
   const entries = folderPreviewEntries("parent", [app], state);
-  assert.deepEqual(entries, [{ appPath: app.path, iconPath: undefined }]);
+  assert.deepEqual(entries, [{ appPath: app.path }]);
   assert.deepEqual(folderPreviewEntries("parent", [], state), []);
   assert.deepEqual(folderPreviewEntries("parent", [app], moveApplication(state, app, null)), []);
   assert.notEqual(folderPreviewKey(entries), folderPreviewKey([{ appPath: app.path, iconPath: "/cache/new.png" }]));

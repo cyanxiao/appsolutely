@@ -89,7 +89,7 @@ function imagePath(directory: string, key: string, source: string, sourceSignatu
 
 /**
  * Read the app bundle's full-resolution icon, resolving through AppKit if needed.
- * Missing/unsupported icons return undefined, retaining Raycast's native fallback.
+ * Missing/unsupported icons return undefined so previews can use a generic miniature.
  */
 export async function applicationIcon(
   appPath: string,
@@ -187,7 +187,7 @@ export async function applicationIcon(
 export async function loadApplicationIcons(
   paths: string[],
   directory: string,
-  onIcon: (appPath: string, image: string) => void,
+  onIcon: (appPath: string, image: string | undefined) => void,
 ): Promise<void> {
   let next = 0;
   await Promise.all(
@@ -195,7 +195,7 @@ export async function loadApplicationIcons(
       while (next < paths.length) {
         const path = paths[next++];
         const image = await applicationIcon(path, directory);
-        if (image) onIcon(path, image);
+        onIcon(path, image);
       }
     }),
   );
