@@ -104,21 +104,3 @@ src/utils/                   Folder operations and sorting
 src/__tests__/               Pure-logic and persistence tests
 assets/extension-icon.png    Original 512×512 icon
 ```
-
-## Native smoke test and screenshots
-
-1. Run `npm run dev`, then open **Open Appsolutely**. Check real macOS icons and launch an app with Return.
-2. Create **Development**, move an editor into it, and create **IDEs** inside it. Move the editor to IDEs. Escape back through both levels.
-3. Search the editor's name from Home and an unrelated folder; open it from the results. Clear search to restore the previous folder.
-4. Rename and move a folder. Verify the move picker excludes itself and descendants.
-5. Close and reopen the command. Confirm organization persists. Delete Development and confirm its apps return to Home.
-6. Install, remove, or rename an app and refresh. Confirm layout survives and missing apps are hidden.
-7. Reset the layout, checking both Cancel and Reset. Check empty-folder actions and both Raycast appearance themes.
-
-Real development screenshots of Home, folders, and a nested application are included in `docs/screenshots/`. These are raw window captures, not the final Store image format.
-
-For submission, capture screenshots with Raycast's **Capture Window** command, using **Save to Metadata**. Capture Home, nested folders, and the organization Action Panel; use consistent themes/backgrounds. Place the resulting `appsolutely-1.png`, `appsolutely-2.png`, and `appsolutely-3.png` in `metadata/`. Raycast recommends 2000×1250 PNG images and up to six screenshots.
-
-This extension uses native Raycast UI. Raycast controls window dimensions and Escape behavior; this does not replace Root Search or macOS Launchpad. Drag-and-drop, manual reordering, cloud sync, and app uninstallation are intentionally out of scope.
-
-API references: [Grid](https://developers.raycast.com/api-reference/user-interface/grid), [Navigation](https://developers.raycast.com/api-reference/user-interface/navigation), [System Utilities](https://developers.raycast.com/api-reference/utilities), [Storage](https://developers.raycast.com/api-reference/storage), [Manifest](https://developers.raycast.com/information/manifest), and [Store preparation](https://developers.raycast.com/basics/prepare-an-extension-for-store).

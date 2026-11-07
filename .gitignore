@@ -6,6 +6,7 @@ raycast-env.d.ts
 docs/VALIDATION.md
 
 # Local settings, credentials, and private runtime data
+/AGENTS.md
 .env
 .env.*
 !.env.example
