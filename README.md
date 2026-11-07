@@ -1,4 +1,7 @@
-# Appsolutely
+<h1 align="center">
+  <img src="assets/extension-icon.png" alt="Appsolutely icon" width="40" height="40" align="absmiddle" />
+  Appsolutely
+</h1>
 
 **Miss good old App Launchpad before macOS 27?**
 
