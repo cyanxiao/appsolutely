@@ -47,6 +47,7 @@
     "lint": "ray lint",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test src/__tests__/*.test.ts",
+    "benchmark": "node scripts/benchmark.mjs",
     "format": "prettier --write ."
   }
 }

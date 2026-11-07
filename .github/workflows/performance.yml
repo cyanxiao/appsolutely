@@ -1,0 +1,31 @@
+name: Performance benchmark
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Compare launcher performance
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          baseline="${PR_BASE_SHA:-$(git rev-parse HEAD^)}"
+          mkdir -p "$RUNNER_TEMP/appsolutely-baseline"
+          git archive "$baseline" | tar -x -C "$RUNNER_TEMP/appsolutely-baseline"
+          node scripts/benchmark.mjs "$RUNNER_TEMP/appsolutely-baseline"

@@ -8,6 +8,8 @@ export class ApplicationIconStore {
   private requests = new Map<string, number>();
   private queued = new Set<string>();
   private running = new Set<string>();
+  private generation = 0;
+  private notification?: ReturnType<typeof setTimeout>;
   private loadIcon: IconLoader;
 
   constructor(loadIcon: IconLoader) {
@@ -26,7 +28,7 @@ export class ApplicationIconStore {
     for (const path of requested) {
       const count = this.requests.get(path) ?? 0;
       this.requests.set(path, count + 1);
-      if (!count && !this.running.has(path)) this.queued.add(path);
+      if (!this.snapshot.has(path) && !this.running.has(path)) this.queued.add(path);
     }
     this.pump();
     let released = false;
@@ -44,10 +46,52 @@ export class ApplicationIconStore {
     };
   };
 
+  /** Refresh cached icons after the application catalog is refreshed. */
+  invalidate = () => {
+    this.generation++;
+    this.snapshot = new Map();
+    for (const path of this.requests.keys()) {
+      if (!this.running.has(path)) this.queued.add(path);
+    }
+    this.notify();
+    this.pump();
+  };
+
+  /** Share the same bounded queue and cache with folder previews. */
+  resolve = (paths: string[], signal?: AbortSignal): Promise<ApplicationIconSnapshot> => {
+    if (signal?.aborted) return Promise.resolve(new Map());
+    const requested = [...new Set(paths)];
+    return new Promise((resolve) => {
+      let release = () => {};
+      const finish = () => {
+        unsubscribe();
+        signal?.removeEventListener("abort", check);
+        release();
+        resolve(signal?.aborted ? new Map() : new Map(requested.map((path) => [path, this.snapshot.get(path)])));
+      };
+      const check = () => {
+        if (signal?.aborted || requested.every((path) => this.snapshot.has(path))) finish();
+      };
+      const unsubscribe = this.subscribe(check);
+      signal?.addEventListener("abort", check, { once: true });
+      release = this.acquire(requested);
+      check();
+    });
+  };
+
+  private notify() {
+    if (this.notification) return;
+    this.notification = setTimeout(() => {
+      this.notification = undefined;
+      for (const listener of this.listeners) listener();
+    }, 16);
+  }
+
   private publish(path: string, image: string | undefined) {
     if (!this.requests.has(path)) return;
+    if (this.snapshot.has(path) && this.snapshot.get(path) === image) return;
     this.snapshot = new Map(this.snapshot).set(path, image);
-    for (const listener of this.listeners) listener();
+    this.notify();
   }
 
   private pump() {
@@ -60,14 +104,19 @@ export class ApplicationIconStore {
   }
 
   private async load(path: string) {
+    const generation = this.generation;
     try {
       // A mode change can release a request before its worker has started.
       await Promise.resolve();
-      if (this.requests.has(path)) this.publish(path, await this.loadIcon(path));
+      if (this.requests.has(path)) {
+        const image = await this.loadIcon(path);
+        if (generation === this.generation) this.publish(path, image);
+      }
     } catch {
-      this.publish(path, undefined);
+      if (generation === this.generation) this.publish(path, undefined);
     } finally {
       this.running.delete(path);
+      if (generation !== this.generation && this.requests.has(path)) this.queued.add(path);
       this.pump();
     }
   }

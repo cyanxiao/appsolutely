@@ -36,10 +36,20 @@ export function prepareApplications(discovered: DiscoveredApplication[]): Launch
     .sort((a, b) => byName(a, b) || a.path.localeCompare(b.path));
 }
 
+const assignmentIndexes = new WeakMap<LauncherState, Map<string, AppAssignment>>();
+
 export function assignmentFor(app: LauncherApplication, state: LauncherState): AppAssignment | undefined {
-  const specific = state.assignments.find((a) => a.appId === app.id);
+  let index = assignmentIndexes.get(state);
+  if (!index) {
+    index = new Map();
+    for (const assignment of state.assignments) {
+      if (!index.has(assignment.appId)) index.set(assignment.appId, assignment);
+    }
+    assignmentIndexes.set(state, index);
+  }
+  const specific = index.get(app.id);
   if (specific) return specific;
-  const stable = state.assignments.find((a) => a.appId === app.stableId);
+  const stable = index.get(app.stableId);
   if (!stable || !app.hasMultipleInstallations) return stable;
   return (stable.appPath ? stable.appPath === app.path : app.isPreferredInstallation) ? stable : undefined;
 }
