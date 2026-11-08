@@ -65,6 +65,7 @@ export function AppItem({
   ) : (
     <Grid.Item
       id={itemId}
+      title={viewMode === "grid-large" ? app.name : undefined}
       content={{
         value:
           viewMode === "grid-large" && iconPath

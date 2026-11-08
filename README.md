@@ -13,7 +13,7 @@ A Launchpad-inspired launcher for Raycast.
 
 Open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return opens the application or folder. Escape clears active search first, then returns to the parent folder.
 
-Browse applications in a compact eight-column **Grid**, a six-column **Grid (Large)** with high-resolution icons and folder previews, or a **List** with application and folder names. Grid names appear in hover tooltips; typing searches all installed applications, including apps inside folders.
+Browse applications in a compact eight-column **Grid**, a six-column **Grid (Large)** with app names, high-resolution icons and folder previews, or a **List** with application and folder names. Grid items also show their names in hover tooltips; typing searches all installed applications, including apps inside folders.
 
 Home shows apps recently opened through Appsolutely above your organized apps: up to three in List, or one row in either Grid view. Recent history starts accumulating after this version is installed.
 
