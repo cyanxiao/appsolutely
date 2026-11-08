@@ -1,4 +1,4 @@
-import { ActionPanel, Grid, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Detail, Grid, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useApplications } from "../hooks/useApplications";
 import { useLauncherState } from "../hooks/useLauncherState";
@@ -146,8 +146,12 @@ export function AppBrowser({
     ),
     actions,
   };
-  // Mount the saved native view directly, and recreate it when the presentation changes.
-  if (viewLoading) return null;
+  // Wait for the initial catalog and layout before mounting a view with an empty state.
+  // A refresh with an existing catalog continues to show the current items.
+  if (viewLoading || status === "loading" || (isLoading && applications.length === 0)) {
+    return <Detail isLoading navigationTitle="Appsolutely" />;
+  }
+  // Recreate the native view when the presentation changes.
   return mode === "list" ? (
     <List key="list" {...props}>
       {children}
