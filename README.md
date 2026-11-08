@@ -6,7 +6,7 @@
 
 A Launchpad-inspired launcher for Raycast.
 
-![Appsolutely Home showing installed applications in Raycast](media/appsolutely.png)
+![Appsolutely Home showing installed applications in Raycast](media/Screenshot_2.png)
 
 ## Features
 
