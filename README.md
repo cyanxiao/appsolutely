@@ -45,6 +45,10 @@ Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views
 
 Your app organization is saved locally. Resetting the layout keeps your selected view. See [Privacy](docs/PRIVACY.md) for details about local data.
 
+### Organize with Raycast AI
+
+Choose **Organize with Raycast AI** from the Action Panel to suggest categories for apps without a saved folder choice. The action sends their names to Raycast AI and requires Raycast AI access. Review the proposed folders and apps before applying: Appsolutely creates an **AI Organized** folder with category subfolders, leaving existing folders and previously moved apps alone. Apps explicitly moved to Home also stay there. You can move or rename the resulting folders and apps afterward.
+
 ## Run locally
 
 Requires macOS, Raycast, and Node.js **24 or newer** with npm.
