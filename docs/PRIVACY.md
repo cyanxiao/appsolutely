@@ -8,9 +8,7 @@ Your Grid, Grid (Large), or List preference and the paths of apps recently opene
 
 High-resolution icon caches and generated folder previews are stored in the extension's support directory. Cache metadata includes local application paths. Appsolutely does not add encryption to these files; they rely on the operating system and Raycast's local storage protections. Reset Layout resets organization but does not purge icon caches or prior recovery copies.
 
-When you choose **Organize with Raycast AI** and generate a proposal, Appsolutely sends the names of apps without a saved folder choice to Raycast's AI API for categorization. It does not include application paths or your existing folder layout in the request. The request is handled by Raycast AI and its model providers; consult Raycast's privacy information for their handling of this data. No AI request is made until you choose to generate a proposal.
-
-Otherwise, the extension's source contains no network requests, analytics, remote image loading, account integration, or automatic error-reporting calls. Native helper commands only read metadata or render icons. Errors can display local paths in Raycast toasts; inspect the screen before sharing an error screenshot.
+The extension's source contains no network requests, analytics, remote image loading, account integration, or automatic error-reporting calls. Native helper commands only read metadata or render icons. Errors can display local paths in Raycast toasts; inspect the screen before sharing an error screenshot.
 
 Development tooling is separate: npm downloads dependencies, Raycast lint fetches its schema and checks the configured Store author, and GitHub receives files when they are pushed.
 

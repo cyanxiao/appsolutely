@@ -7,7 +7,6 @@ import { AppBrowser } from "./AppBrowser";
 import { useViewMode } from "../hooks/useViewMode";
 import { perform } from "./feedback";
 import { nextViewMode, VIEW_MODE_LABELS } from "../services/view-preference";
-import { AIOrganize } from "./AIOrganize";
 
 export function GlobalActions({ folderId }: { folderId: string | null }) {
   const { update, status, retry } = useLauncherState();
@@ -45,9 +44,6 @@ export function GlobalActions({ folderId }: { folderId: string | null }) {
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
           target={<AppBrowser folderId={folderId} searchMode />}
         />
-        {status === "ready" && (
-          <Action.Push title="Organize with Raycast AI" icon={Icon.Stars} target={<AIOrganize />} />
-        )}
         <Action
           title="Refresh Applications"
           icon={Icon.ArrowClockwise}

@@ -168,7 +168,11 @@ export function AppBrowser({
   );
   const props = {
     isLoading: isLoading || status === "loading" || viewLoading || iconsLoading,
-    navigationTitle: searchMode ? "Search All Applications" : folderPath(state.folders, currentFolder),
+    navigationTitle: searchMode
+      ? "Search All Applications"
+      : folderId
+        ? folderPath(state.folders, currentFolder)
+        : undefined,
     searchBarPlaceholder: "Search all applications…",
     searchText,
     onSearchTextChange: setSearchText,
@@ -197,7 +201,14 @@ export function AppBrowser({
   // Wait for the initial catalog and layout before mounting a view with an empty state.
   // A refresh with an existing catalog continues to show the current items.
   if (viewLoading || status === "loading" || (isLoading && applications.length === 0)) {
-    return <Detail isLoading navigationTitle="Appsolutely" />;
+    return (
+      <Detail
+        isLoading
+        navigationTitle={
+          searchMode ? "Search All Applications" : folderId ? folderPath(state.folders, currentFolder) : undefined
+        }
+      />
+    );
   }
   // Recreate the native view when the presentation changes.
   return mode === "list" ? (
