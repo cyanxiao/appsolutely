@@ -15,6 +15,8 @@ Open Raycast and select **Open Appsolutely**. Arrow keys select a tile; Return o
 
 Browse applications in a compact eight-column **Grid**, a six-column **Grid (Large)** with high-resolution icons and folder previews, or a **List** with application and folder names. Grid names appear in hover tooltips; typing searches all installed applications, including apps inside folders.
 
+Home shows apps recently opened through Appsolutely above your organized apps: up to three in List, or one row in either Grid view. Recent history starts accumulating after this version is installed.
+
 Use the **Grid / Grid (Large) / List** selector at the top right, or cycle views through the Action Panel (**⌘⇧V**). Appsolutely remembers your choice across Home, folders, search, and future launches.
 
 ## Organize your apps

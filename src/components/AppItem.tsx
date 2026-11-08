@@ -14,12 +14,14 @@ export function AppItem({
   viewMode,
   iconPath,
   iconPending,
+  itemId = app.id,
 }: {
   app: LauncherApplication;
   folderId: string | null;
   viewMode: ViewMode;
   iconPath?: string;
   iconPending?: boolean;
+  itemId?: string;
 }) {
   const { state, update, status } = useLauncherState();
   const assignedFolder = assignmentFor(app, state)?.folderId ?? null;
@@ -54,7 +56,7 @@ export function AppItem({
   );
   return viewMode === "list" ? (
     <List.Item
-      id={app.id}
+      id={itemId}
       title={app.name}
       subtitle={app.hasMultipleInstallations ? app.path.replace(/\/[^/]+$/, "") : undefined}
       icon={{ fileIcon: app.path }}
@@ -62,7 +64,7 @@ export function AppItem({
     />
   ) : (
     <Grid.Item
-      id={app.id}
+      id={itemId}
       content={{
         value:
           viewMode === "grid-large" && iconPath

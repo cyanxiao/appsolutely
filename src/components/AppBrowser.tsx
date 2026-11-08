@@ -4,6 +4,8 @@ import { useApplications } from "../hooks/useApplications";
 import { useLauncherState } from "../hooks/useLauncherState";
 import { useViewMode } from "../hooks/useViewMode";
 import { useApplicationIcons } from "../hooks/useApplicationIcons";
+import { useRecentApplications } from "../hooks/useRecentApplications";
+import { recentApplications } from "../services/recent-applications";
 import { assignmentFor, searchApplications } from "../services/application-model";
 import { folderPath } from "../utils/hierarchy";
 import { byOrderThenName } from "../utils/sorting";
@@ -25,6 +27,7 @@ export function AppBrowser({
   const { applications, isLoading, error: applicationError } = useApplications();
   const { state, status, warning, error: storageError } = useLauncherState();
   const { mode, isLoading: viewLoading, error: viewError, setMode } = useViewMode();
+  const recentPaths = useRecentApplications();
   const [searchText, setSearchText] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const searching = searchText.trim().length > 0;
@@ -71,51 +74,96 @@ export function AppBrowser({
       .sort(byOrderThenName);
   }, [applications, state, currentFolder, searching, searchText]);
   const largeGrid = mode === "grid-large";
-  const icons = useApplicationIcons(visibleApps, largeGrid && !viewLoading);
-  const iconsLoading = largeGrid && visibleApps.some((app) => !icons.has(app.path));
+  const recentApps = useMemo(
+    () =>
+      !searching && !currentFolder && !searchMode
+        ? recentApplications(recentPaths, applications, mode === "list" ? 3 : largeGrid ? 6 : 8)
+        : [],
+    [recentPaths, applications, mode, largeGrid, searching, currentFolder, searchMode],
+  );
+  const iconApps = useMemo(() => [...visibleApps, ...recentApps], [visibleApps, recentApps]);
+  const icons = useApplicationIcons(iconApps, largeGrid && !viewLoading);
+  const iconsLoading = largeGrid && iconApps.some((app) => !icons.has(app.path));
   const folders = searching ? [] : state.folders.filter((f) => f.parentId === currentFolder).sort(byOrderThenName);
   const error = applicationError ?? storageError;
 
   const EmptyView = mode === "list" ? List.EmptyView : Grid.EmptyView;
   const Dropdown = mode === "list" ? List.Dropdown : Grid.Dropdown;
-  const children = (
-    <>
-      <EmptyView
-        icon={error ? Icon.ExclamationMark : searching ? Icon.MagnifyingGlass : Icon.Folder}
-        title={
-          error
-            ? "Could Not Load Appsolutely"
-            : searching
-              ? "No Applications Found"
-              : currentFolder
-                ? "This Folder Is Empty"
-                : "No Applications Found"
-        }
-        description={
-          error?.message ??
-          (searching
-            ? "Try another application name."
+  const emptyView = (
+    <EmptyView
+      icon={error ? Icon.ExclamationMark : searching ? Icon.MagnifyingGlass : Icon.Folder}
+      title={
+        error
+          ? "Could Not Load Appsolutely"
+          : searching
+            ? "No Applications Found"
             : currentFolder
-              ? "Move apps here using the Action Panel, or create a subfolder."
-              : "Refresh applications to check again.")
-        }
-        actions={actions}
+              ? "This Folder Is Empty"
+              : "No Applications Found"
+      }
+      description={
+        error?.message ??
+        (searching
+          ? "Try another application name."
+          : currentFolder
+            ? "Move apps here using the Action Panel, or create a subfolder."
+            : "Refresh applications to check again.")
+      }
+      actions={actions}
+    />
+  );
+  const appItems = (apps: typeof visibleApps, recent = false) =>
+    apps.map((app) => (
+      <AppItem
+        key={recent ? `recent:${app.id}` : app.id}
+        itemId={recent ? `recent:${app.id}` : app.id}
+        app={app}
+        folderId={currentFolder}
+        viewMode={mode}
+        iconPath={largeGrid ? icons.get(app.path) : undefined}
+        iconPending={largeGrid && !icons.has(app.path)}
       />
-      {!viewLoading &&
-        folders.map((folder) => (
-          <FolderItem key={folder.id} folder={folder} parentId={currentFolder} viewMode={mode} />
-        ))}
-      {!viewLoading &&
-        visibleApps.map((app) => (
-          <AppItem
-            key={app.id}
-            app={app}
-            folderId={currentFolder}
-            viewMode={mode}
-            iconPath={largeGrid ? icons.get(app.path) : undefined}
-            iconPending={largeGrid && !icons.has(app.path)}
-          />
-        ))}
+    ));
+  const regularItems = (
+    <>
+      {folders.map((folder) => (
+        <FolderItem key={folder.id} folder={folder} parentId={currentFolder} viewMode={mode} />
+      ))}
+      {appItems(visibleApps)}
+    </>
+  );
+  const children = recentApps.length ? (
+    mode === "list" ? (
+      <>
+        {emptyView}
+        <List.Section title="Recently Opened">{appItems(recentApps, true)}</List.Section>
+        <List.Section title="Applications">{regularItems}</List.Section>
+      </>
+    ) : (
+      <>
+        {emptyView}
+        <Grid.Section
+          title="Recently Opened"
+          columns={largeGrid ? 6 : 8}
+          inset={largeGrid ? Grid.Inset.Medium : Grid.Inset.Large}
+          fit={Grid.Fit.Contain}
+        >
+          {appItems(recentApps, true)}
+        </Grid.Section>
+        <Grid.Section
+          title="Applications"
+          columns={largeGrid ? 6 : 8}
+          inset={largeGrid ? Grid.Inset.Medium : Grid.Inset.Large}
+          fit={Grid.Fit.Contain}
+        >
+          {regularItems}
+        </Grid.Section>
+      </>
+    )
+  ) : (
+    <>
+      {emptyView}
+      {regularItems}
     </>
   );
   const props = {

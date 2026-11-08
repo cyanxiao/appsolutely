@@ -4,7 +4,7 @@
 
 Appsolutely reads the installed application catalog exposed by Raycast, application bundle metadata, and application icons. It saves folder names, folder relationships, application identities, installation paths, and ordering in Raycast LocalStorage. Recovery copies of repaired layouts also stay in LocalStorage.
 
-Your Grid, Grid (Large), or List preference is also saved locally in Raycast LocalStorage. High-resolution application icons and folder previews are prepared only in Grid (Large).
+Your Grid, Grid (Large), or List preference and the paths of apps recently opened through Appsolutely are also saved locally in Raycast LocalStorage. Reset Layout does not clear the recent-app history. High-resolution application icons and folder previews are prepared only in Grid (Large).
 
 High-resolution icon caches and generated folder previews are stored in the extension's support directory. Cache metadata includes local application paths. Appsolutely does not add encryption to these files; they rely on the operating system and Raycast's local storage protections. Reset Layout resets organization but does not purge icon caches or prior recovery copies.
 
